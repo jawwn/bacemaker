@@ -6,11 +6,15 @@
 
   
 */
-// First array entry can be whatever, pins[1] if the bottom C
+// First array entry can be whatever, pins[1] is the bottom C, pins[13] is the top C
 // Use these to specify the pins you'll be using on your Arduino
 int pins[] = {
   100, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16
 };
+
+int ledPin = A4;
+
+
 #include <EEPROM.h>
 #include <MozziGuts.h>
 #include <Oscil.h> // oscillator template
@@ -34,7 +38,6 @@ int pins[] = {
 
 
 
-int ledPin = A4;
 // use: Oscil <table_size, update_rate> oscilName (wavetable), look in .h file of table #included above
 Oscil <SIN2048_NUM_CELLS, AUDIO_RATE> aSin1(SIN2048_DATA);
 Oscil <SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aSaw1(SAW_ANALOGUE512_DATA);
