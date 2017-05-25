@@ -82,7 +82,7 @@ int waveshaper_speed2_addr = 232;
 int trem_speed_addr = 240;
 int trem_addr = 248;
 int long_hold_addr = 256;
-
+int swell_addr = 208;
 int sin_active = EEPROM.read(sin_addr);
 int saw_active = EEPROM.read(saw_addr);
 int tri_active = EEPROM.read(tri_addr);
@@ -99,7 +99,7 @@ int trem_speed = EEPROM.read(trem_speed_addr);
 int waveshaper_active = EEPROM.read(waveshaper_addr);
 int waveshaper_speed1 = EEPROM.read(waveshaper_speed1_addr);
 int waveshaper_speed2 = EEPROM.read(waveshaper_speed2_addr);
-
+int swell = EEPROM.read(swell_addr);
 int long_hold = EEPROM.read(long_hold_addr);
 int long_hold_active = 0;
 EventDelay longHoldDelay;
@@ -209,6 +209,29 @@ void updateControl(){
         digitalWrite(ledPin, HIGH);
       }
       else {
+        if (swell == 1) {
+           envelope.setADLevels(240,200);
+           envelope.setTimes(320,520,400000,40000);    
+           envelope.noteOn();
+           longHoldDelay.start(54000000);
+        }
+        else if (swell == 2) {
+           envelope.setADLevels(240,200);
+           envelope.setTimes(1820,1620,4000000,40000);    
+           envelope.noteOn();
+           longHoldDelay.start(540000000);          
+        }
+        else {
+           envelope.setADLevels(240,200);
+           envelope.setTimes(80,100,400000,40000);    
+           envelope.noteOn();
+           longHoldDelay.start(540000000);
+        }
+        envelope.update();
+        long_hold_gain = envelope.next();
+        Serial.println(long_hold_gain);
+
+
         int note = ((notes[current_pin][octave]));
         key_pressed = 1;
         aSin1.setFreq(note); // set the frequency
@@ -234,28 +257,36 @@ void updateControl(){
       }
     }
     else {
-      if ((long_hold > 0) && (long_hold_active > 0)) {
+      if ((long_hold_active > 0)) {
         // long_hold_active goes 1 at start, 2 in progress
         if (long_hold_active == 1 ) {
+
+          envelope.setADLevels(200,long_hold_gain);
           if (long_hold == 1) {
-           envelope.setADLevels(200,200);
+
            envelope.setTimes(20,20,160,220);    
            envelope.noteOn();
            longHoldDelay.start(440);
           }          
           else if (long_hold == 2) {
-           envelope.setADLevels(200,200);
-           envelope.setTimes(20,20,320,580);    
+
+           envelope.setTimes(20,20,320,900);    
            envelope.noteOn();
-           longHoldDelay.start(940);
+           longHoldDelay.start(1260);
+          }
+          else {
+
+           envelope.setTimes(20,20,20,20);    
+           envelope.noteOn();
+           longHoldDelay.start(80);
           }
          }
+
         envelope.update();
         long_hold_gain = envelope.next(); // this is where it's different to an audio rate envelope
         long_hold_active = 2;
         if (envelope.playing() == false) {
           silenceMaker();
-          long_hold_active = 0;
         }
       }
       else {
@@ -293,7 +324,7 @@ int updateAudio(){
   if (sin2_active == 1) {
     returner += (int) ((long)((long) secondary_ins_gain * aSin2.next()) >> 8);     
   }
-  secondary_ins_gain = 80;
+  secondary_ins_gain = 140;
   if (sin3_active == 1) {
     returner += (int) ((long)((long) secondary_ins_gain * aSin3.next()) >> 8);
   }
@@ -314,12 +345,10 @@ int updateAudio(){
     returner += ((int)aSin8.next());
   }
   
-  if (long_hold_active == 2 ) {
-    returner = (int) ((long)((long) long_hold_gain * returner) >> 8);
-  }
-  else {
-    returner = (int) ((long)((long) 200 * returner) >> 8);
-  }
+
+   returner = (int) ((long)((long) long_hold_gain * returner) >> 8);
+
+
   if (trem_active == 1) {
     returner = (int)((long)((long) returner * tremGain.next()) >> 16);
   }
@@ -342,7 +371,7 @@ void silenceMaker() {
   aSin9.setFreq(0);        
   long_hold_active = 0;
   key_pressed = 0;
- 
+  long_hold_gain = 0;
   master_gain = 0;
   longHoldDelay.start(100);
 }
@@ -582,6 +611,23 @@ void fxSettingChanger() {
       EEPROM.write(long_hold_addr, 2);
       long_hold = 2;
       settingChanged();   
+    }
+    
+    // SWELL
+    else if ((digitalRead(pins[6]) == LOW)) {
+      EEPROM.write(swell_addr, 0);
+      swell = 0;
+      settingChanged();   
+    }
+    else if ((digitalRead(pins[8]) == LOW)) {
+      EEPROM.write(swell_addr, 1);
+      swell = 1;
+      settingChanged();   
+    }    
+    else if ((digitalRead(pins[10]) == LOW)) {
+      EEPROM.write(swell_addr, 2);
+      swell = 2;
+      settingChanged();   
     }    
     else if ((digitalRead(pins[3]) == LOW)) {
       if (trem_active == 1) {
@@ -607,7 +653,7 @@ void fxSettingChanger() {
       settingChanged();   
     }
 
-    else if ((digitalRead(pins[6]) == LOW)) {
+    else if ((digitalRead(pins[5]) == LOW)) {
       if (waveshaper_active == 1) {
         waveshaper_active = 0;
         EEPROM.write(waveshaper_addr, 0);
@@ -617,26 +663,6 @@ void fxSettingChanger() {
         EEPROM.write(waveshaper_addr, 1);
       }
       settingChanged();
-    }
-    else if ((digitalRead(pins[8]) == LOW)) {
-      waveshaper_speed1 = ((int) waveshaper_speed1 - .1);
-      EEPROM.write(waveshaper_speed1_addr, waveshaper_speed1);
-      waveshaper_speed2 = ((int) waveshaper_speed2 - .1);
-      EEPROM.write(waveshaper_speed2_addr, waveshaper_speed2);
-      aGain1.setFreq(waveshaper_speed1);
-      aGain2.setFreq(waveshaper_speed2);
-      settingChanged();   
-    }
-    else if ((digitalRead(pins[10]) == LOW)) {
-      waveshaper_speed1 = ((int) waveshaper_speed1 + .1);
-      EEPROM.write(waveshaper_speed1_addr, waveshaper_speed1);
-      waveshaper_speed2 = ((int) waveshaper_speed2 + .1);
-      EEPROM.write(waveshaper_speed2_addr, waveshaper_speed2);
-      Serial.println(waveshaper_speed1);
-      Serial.println(waveshaper_speed2);
-      aGain1.setFreq(waveshaper_speed1);
-      aGain2.setFreq(waveshaper_speed2);
-      settingChanged(); 
     }
  }
 }
@@ -683,6 +709,8 @@ void fxReset() {
     EEPROM.write(waveshaper_speed2_addr, .4f);    
     aGain1.setFreq(2);
     aGain2.setFreq((int) 0.4);
+    EEPROM.write(swell_addr, 0);
+    swell = 0;
     waveshaper_active = 0;
     long_hold = 1;
     trem_active = 0;
