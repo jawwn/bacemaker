@@ -3,20 +3,15 @@
     check the README or http://sensorium.github.com/Mozzi/
     Mozzi help/discussion/announcements:
     https://groups.google.com/forum/#!forum/mozzi-users
- 
+
     Uses some example code from Mozzi Examples
     Tim Barrass 2013, CC by-nc-sa.
-  
 */
-// First array entry can be whatever, pins[1] is the bottom C, pins[13] is the top C
+// First array entry can be whatever, pins[1] if the bottom C
 // Use these to specify the pins you'll be using on your Arduino
 int pins[] = {
   100, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16
 };
-
-int ledPin = A4;
-
-
 #include <EEPROM.h>
 #include <MozziGuts.h>
 #include <Oscil.h> // oscillator template
@@ -40,6 +35,7 @@ int ledPin = A4;
 
 
 
+int ledPin = A4;
 // use: Oscil <table_size, update_rate> oscilName (wavetable), look in .h file of table #included above
 Oscil <SIN2048_NUM_CELLS, AUDIO_RATE> aSin1(SIN2048_DATA);
 Oscil <SAW_ANALOGUE512_NUM_CELLS, AUDIO_RATE> aSaw1(SAW_ANALOGUE512_DATA);
@@ -327,7 +323,7 @@ int updateAudio(){
   if (trem_active == 1) {
     returner = (int)((long)((long) returner * tremGain.next()) >> 16);
   }
-
+returner = aCompress.next(256u + returner);
 return returner * master_gain ;// total;
 
 }
@@ -717,6 +713,5 @@ void loop(){
     audioHook(); // required here
 
 }
-
 
 
