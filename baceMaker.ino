@@ -3,7 +3,9 @@
     check the README or http://sensorium.github.com/Mozzi/
     Mozzi help/discussion/announcements:
     https://groups.google.com/forum/#!forum/mozzi-users
-
+ 
+    Uses some example code from Mozzi Examples
+    Tim Barrass 2013, CC by-nc-sa.
   
 */
 // First array entry can be whatever, pins[1] is the bottom C, pins[13] is the top C
