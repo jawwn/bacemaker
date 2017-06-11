@@ -7,7 +7,7 @@
     Uses some example code from Mozzi Examples
     Tim Barrass 2013, CC by-nc-sa.
 */
-// First array entry can be whatever, pins[1] if the bottom C
+// First array entry can be whatever, pins[1] is the bottom C
 // Use these to specify the pins you'll be using on your Arduino
 int pins[] = {
   100, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16
