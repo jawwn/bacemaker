@@ -69,4 +69,6 @@ Bb - Long Swell
 C1 - Reset FX settings
 
 
-Settings are saved in the EEPROM when changed, so they'll restore when you turn on the Bacemaer
+Settings are saved in the EEPROM when changed, so they'll restore when you turn on the Bacemaer.
+
+When initializing the newly uploaded Bacemaker, you have to reset your Oscillator and FX settings to get any sound. 
