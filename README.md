@@ -3,6 +3,11 @@
 
 The BaceMaker Foot Synth
 
+https://www.youtube.com/watch?v=J1-GKqAYpiA
+
+https://www.youtube.com/watch?v=1k-If79376U
+
+
 Uses the Mozzi Library: http://sensorium.github.io/Mozzi/
 
 Output on Pin 9, be sure to connect your preferred resistors so it's not ridiculously loud! 10K to ground should do it.
